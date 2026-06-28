@@ -13,6 +13,7 @@ One-time setup (requires internet, allowed as pre-computation per spec §10.3):
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Callable
 
 MODEL_DIR = Path(__file__).resolve().parents[3] / "models" / "all-MiniLM-L6-v2"
 MAX_CHARS = 2000  # ~512 tokens; summary + recent roles carry the signal
@@ -26,8 +27,17 @@ def embeddings_available() -> bool:
     return MODEL_DIR.exists()
 
 
-def semantic_similarities(texts: list[str], query: str) -> list[float] | None:
-    """Cosine similarity of each text to the query, or None if unavailable."""
+def semantic_similarities(
+    texts: list[str],
+    query: str,
+    progress_cb: Callable[[int], None] | None = None,
+) -> list[float] | None:
+    """Cosine similarity of each text to the query, or None if unavailable.
+
+    ``progress_cb``, if given, is called once with the number of encoded
+    documents after the (potentially slow) embedding step completes — lets the
+    Streamlit layer surface a status update around the dense re-rank.
+    """
     if not embeddings_available():
         return None
     from sentence_transformers import SentenceTransformer
@@ -36,6 +46,8 @@ def semantic_similarities(texts: list[str], query: str) -> list[float] | None:
     docs = [t[:MAX_CHARS] for t in texts]
     doc_vecs = model.encode(docs, batch_size=64, convert_to_numpy=True,
                             normalize_embeddings=True, show_progress_bar=False)
+    if progress_cb is not None:
+        progress_cb(len(docs))
     q_vec = model.encode([query[:MAX_CHARS]], convert_to_numpy=True,
                          normalize_embeddings=True)[0]
     sims = doc_vecs @ q_vec  # normalized → dot product is cosine

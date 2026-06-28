@@ -3,5 +3,7 @@ pandas>=2.0
 streamlit>=1.30
 plotly>=5.18
 rank-bm25>=0.2.2
+ijson>=3.2.3            # streaming JSON-array parser — no full-file load for large uploads
+psutil>=5.9            # optional RSS guard in the Streamlit upload path
 # Optional dense embedding layer (pulls torch ~700MB). Enable with scripts/download_model.py
 sentence-transformers>=3.0

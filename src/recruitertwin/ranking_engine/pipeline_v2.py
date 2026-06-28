@@ -20,7 +20,7 @@ import heapq
 import json
 import time
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Callable, Iterable, Iterator
 
 from recruitertwin.job_intelligence.jd_profile import JD_QUERY_TEXT
 from recruitertwin.ranking_engine import scorer_v2
@@ -43,30 +43,89 @@ def rank_candidates(
     shortlist_size: int = 1500,
     verbose: bool = True,
 ) -> list[dict[str, Any]]:
+    """Rank candidates from a JSONL/JSON-array file path (CLI entry point).
+
+    Thin wrapper around :func:`rank_from_iter` that streams the file from disk.
+    """
+    rows, _stats = rank_from_iter(
+        iter_candidates(candidates_path),
+        top_n=top_n,
+        shortlist_size=shortlist_size,
+        verbose=verbose,
+    )
+    return rows
+
+
+def rank_from_iter(
+    candidates: Iterable[dict[str, Any]],
+    top_n: int = 100,
+    shortlist_size: int = 1500,
+    progress_cb: Callable[[int, int, int], None] | None = None,
+    stage2_cb: Callable[[int], None] | None = None,
+    verbose: bool = True,
+    honeypot_sample_cap: int = 50,
+    progress_every: int = 500,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Two-stage ranking over an arbitrary candidate iterator.
+
+    Stage 1 streams every candidate once and keeps only the top ``shortlist_size``
+    in a bounded heap, so peak memory stays ~O(shortlist_size) regardless of how
+    many candidates flow through (a 500 MB JSONL upload never lands in RAM whole).
+
+    ``progress_cb(scanned, honeypots, shortlist_len)`` is invoked every
+    ``progress_every`` records during Stage 1 (and once at the end) so callers
+    such as the Streamlit UI can render a live progress bar. ``stage2_cb(n_docs)``
+    is forwarded to the embedding step. Returns ``(rows, stats)``.
+    """
     t0 = time.time()
+    from recruitertwin.ranking_engine.features import candidate_texts
 
     # ---- Stage 1: streaming evidence scoring over the full pool ----------
     heap: list[tuple[float, str, dict, str]] = []  # (score, cid, result, text)
     n = 0
-    for cand in iter_candidates(candidates_path):
+    honeypots = 0
+    honeypot_sample: list[dict[str, Any]] = []
+    for cand in candidates:
         n += 1
         res = scorer_v2.score_candidate(cand)
-        if res["honeypot"] or res["final_score"] <= 0:
-            continue
-        from recruitertwin.ranking_engine.features import candidate_texts
-        text, _ = candidate_texts(cand)
-        item = (res["final_score"], res["candidate_id"], res, text)
-        if len(heap) < shortlist_size:
-            heapq.heappush(heap, item)
-        elif item[0] > heap[0][0]:
-            heapq.heapreplace(heap, item)
+        if res["honeypot"]:
+            honeypots += 1
+            if len(honeypot_sample) < honeypot_sample_cap:
+                honeypot_sample.append({
+                    "candidate_id": res["candidate_id"],
+                    "title": res["title"],
+                    "flags": "; ".join(res["penalties"]),
+                })
+        elif res["final_score"] > 0:
+            text, _ = candidate_texts(cand)
+            item = (res["final_score"], res["candidate_id"], res, text)
+            if len(heap) < shortlist_size:
+                heapq.heappush(heap, item)
+            elif item[0] > heap[0][0]:
+                heapq.heapreplace(heap, item)
+        if progress_cb and n % progress_every == 0:
+            progress_cb(n, honeypots, len(heap))
         if verbose and n % 20000 == 0:
             print(f"  scanned {n} candidates ({time.time() - t0:.1f}s)")
 
+    if progress_cb:
+        progress_cb(n, honeypots, len(heap))
+
     shortlist = sorted(heap, key=lambda x: (-x[0], x[1]))
+    stats: dict[str, Any] = {
+        "scanned": n,
+        "honeypots": honeypots,
+        "shortlist": len(shortlist),
+        "honeypot_sample": honeypot_sample,
+        "stage1_seconds": round(time.time() - t0, 2),
+    }
     if verbose:
         print(f"Stage 1 done: {n} scanned, shortlist {len(shortlist)} "
               f"({time.time() - t0:.1f}s)")
+
+    if not shortlist:
+        stats["seconds"] = round(time.time() - t0, 2)
+        return [], stats
 
     # ---- Stage 2: BM25 + TF-IDF hybrid re-ranking over the shortlist ------
     # BM25 (Okapi) brings term saturation and document-length normalization
@@ -97,7 +156,7 @@ def rank_candidates(
     # Optional dense layer: semantic similarity via local MiniLM. Catches
     # plain-language strong candidates that lexical matching misses.
     from recruitertwin.ranking_engine.embedder import semantic_similarities
-    emb = semantic_similarities(texts, jd_text)
+    emb = semantic_similarities(texts, jd_text, progress_cb=stage2_cb)
     if emb is None and verbose:
         print("  [info] embedding model not found — using BM25+TF-IDF only "
               "(run scripts/download_model.py to enable the dense layer)")
@@ -138,7 +197,9 @@ def rank_candidates(
         })
     if verbose:
         print(f"Pipeline complete in {time.time() - t0:.1f}s")
-    return out
+    stats["stage2_seconds"] = round(time.time() - t0 - stats["stage1_seconds"], 2)
+    stats["seconds"] = round(time.time() - t0, 2)
+    return out, stats
 
 
 def _avail(res: dict[str, Any]) -> float:
