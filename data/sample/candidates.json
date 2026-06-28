@@ -1,0 +1,72 @@
+[
+  {
+    "candidate_id": "CAND-001",
+    "name": "Aditi Sharma",
+    "current_title": "Senior ML Engineer, Talent Search",
+    "summary": "Builds ranking pipelines for recruiter search, resume understanding, and skill extraction. Strong in Python, NLP, LLM workflows, and production APIs.",
+    "years_experience": 7,
+    "skills": ["Python", "Machine Learning", "Search", "Ranking", "NLP", "APIs", "LLMs"],
+    "domains": ["Recruitment", "Talent Data", "Search Infrastructure"],
+    "activity_signals": {
+      "engagement_score": 8.8,
+      "profile_completeness": 0.94,
+      "recent_activity_days": 24
+    }
+  },
+  {
+    "candidate_id": "CAND-002",
+    "name": "Rahul Verma",
+    "current_title": "Backend Engineer, Marketplace Platform",
+    "summary": "Works on large-scale backend services, APIs, and relevance-driven catalog systems. Limited direct hiring-domain exposure but strong systems background.",
+    "years_experience": 6,
+    "skills": ["Python", "APIs", "Backend Systems", "Distributed Services", "Search"],
+    "domains": ["E-commerce", "Platform Engineering"],
+    "activity_signals": {
+      "engagement_score": 7.6,
+      "profile_completeness": 0.9,
+      "recent_activity_days": 18
+    }
+  },
+  {
+    "candidate_id": "CAND-003",
+    "name": "Neha Iyer",
+    "current_title": "Staff Data Scientist, HR Analytics",
+    "summary": "Leads modeling work around candidate funnel analytics, hiring intent, and forecasting. Strong in ML and recruitment data, lighter in backend implementation.",
+    "years_experience": 9,
+    "skills": ["Python", "Machine Learning", "Talent Data", "Hiring", "Analytics", "NLP"],
+    "domains": ["Recruitment", "HR Analytics"],
+    "activity_signals": {
+      "engagement_score": 7.9,
+      "profile_completeness": 0.97,
+      "recent_activity_days": 21
+    }
+  },
+  {
+    "candidate_id": "CAND-004",
+    "name": "Karan Mehta",
+    "current_title": "Senior Search Engineer",
+    "summary": "Search specialist with strong ranking and retrieval experience across document-heavy systems. Less direct exposure to hiring workflows.",
+    "years_experience": 5,
+    "skills": ["Python", "Search", "Ranking", "Retrieval", "Relevance", "APIs"],
+    "domains": ["Search Infrastructure", "Knowledge Systems"],
+    "activity_signals": {
+      "engagement_score": 8.1,
+      "profile_completeness": 0.88,
+      "recent_activity_days": 27
+    }
+  },
+  {
+    "candidate_id": "CAND-005",
+    "name": "Sana Khan",
+    "current_title": "ML Engineer, Career Platform",
+    "summary": "Works on recommendation systems, role matching, and candidate engagement models. Strong applied ML and product sense for hiring use cases.",
+    "years_experience": 4,
+    "skills": ["Python", "Machine Learning", "Ranking", "Recommendations", "LLMs", "APIs"],
+    "domains": ["Hiring", "Career Platforms", "Recommendations"],
+    "activity_signals": {
+      "engagement_score": 9.0,
+      "profile_completeness": 0.92,
+      "recent_activity_days": 29
+    }
+  }
+]

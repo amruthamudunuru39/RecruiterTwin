@@ -1,0 +1,4 @@
+candidate_id,final_score,rank,key_factors,risk_flags
+C_001,87,1,"Skill; Project; Experience","-"
+C_002,82,2,"Skill; Domain Fit","Job Hopping"
+C_003,78,3,"Project; Growth","Skill Gap"

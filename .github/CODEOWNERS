@@ -1,0 +1,19 @@
+# Default owner / project lead
+* @gkmraju
+
+# Job intelligence workstream
+/src/recruitertwin/job_intelligence/ @vamsisirivuri @amruthamudunuru39 @gkmraju
+/data/contracts/job_intelligence_output.json @vamsisirivuri @amruthamudunuru39 @gkmraju
+
+# Ranking engine workstream
+/src/recruitertwin/ranking_engine/ @gkmraju
+/submission/ @gkmraju
+/data/contracts/ranked_output_columns.csv @gkmraju
+
+# Frontend and UX workstream
+/app/ @amruthamudunuru39 @vamsisirivuri @gkmraju
+
+# Shared docs and architecture
+/README.md @gkmraju
+/docs/ @gkmraju
+/CONTRIBUTING.md @gkmraju

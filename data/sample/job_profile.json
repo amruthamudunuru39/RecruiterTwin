@@ -1,0 +1,24 @@
+{
+  "role_title": "Senior AI Search and Ranking Engineer",
+  "summary": "Build retrieval, ranking, and candidate matching systems for hiring workflows. The role needs strong Python skills, practical machine learning experience, backend systems thinking, and a solid understanding of relevance, scoring, and explainability.",
+  "seniority": "senior",
+  "min_years_experience": 5,
+  "required_skills": [
+    "Python",
+    "Machine Learning",
+    "Search",
+    "Ranking",
+    "APIs"
+  ],
+  "preferred_skills": [
+    "LLMs",
+    "NLP",
+    "Talent Data",
+    "Backend Systems"
+  ],
+  "domains": [
+    "Hiring",
+    "Recruitment",
+    "Search Infrastructure"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "role": "Data Scientist",
+  "seniority": "2-4 years",
+  "domain": "Analytics / AI",
+  "must_have_skills": [
+    "Python",
+    "ML",
+    "SQL"
+  ],
+  "nice_to_have_skills": [
+    "AWS",
+    "MLOps",
+    "Docker"
+  ],
+  "responsibilities": [
+    "Build ML models",
+    "Analyze data",
+    "Deploy solutions"
+  ],
+  "success_traits": [
+    "Problem solving",
+    "Experimentation",
+    "Business thinking"
+  ]
+}
