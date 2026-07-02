@@ -7,21 +7,18 @@
 # ============================================================================
 # Team identity
 # ============================================================================
-team_name: "your-team-name-here"  # Used in leaderboard and announcements
+team_name: "RecruiterTwin"  # Used in leaderboard and announcements
 
 primary_contact:
-  name: "Full Name"
-  email: "primary@example.com"   # Used for all organizer communication
-  phone: "+91-XXXXXXXXXX"        # Used for top-50 / top-10 outreach
+  name: "Amrutha Varma"
+  email: "amrutha.varma01@gmail.com"   # Used for all organizer communication
+  phone: "+91-9392378992"              # Used for top-50 / top-10 outreach
 
 team_members:
-  - name: "Member 1 Full Name"
-    email: "member1@example.com"
-    role: "ML Engineer"          # Optional, e.g. "Team Lead", "Backend", "Data"
-  - name: "Member 2 Full Name"
-    email: "member2@example.com"
-    role: "Data Engineer"
-  # Add more members as needed; solo participants list just one member
+  - name: "Amrutha Varma"
+    email: "amrutha.varma01@gmail.com"
+    role: "Solo participant"     # Junior Software Developer, Microgrid Technologies Pvt Ltd
+  # Solo participant — single member.
 
 # ============================================================================
 # Code and reproducibility
@@ -43,15 +40,15 @@ reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submi
 # Compute environment
 # ============================================================================
 compute:
-  platform: "MacBook Pro M2"                    # Or: "AWS EC2 c5.4xlarge", "Local Linux box", etc.
-  cpu_cores: 8                                  # Number of CPU cores used
+  platform: "Windows 11 laptop (Intel Core i5-8365U)"  # 4 cores / 8 threads @ 1.6GHz
+  cpu_cores: 4                                  # 4 physical cores (8 logical threads)
   ram_gb: 16                                    # Available RAM in GB
-  python_version: "3.11.4"                      # python --version
-  os: "macOS 14.2"                              # Or "Ubuntu 22.04 LTS", etc.
-  uses_gpu_for_inference: false                 # Must be false — see compute constraints
-  has_network_during_ranking: false             # Must be false — no API calls during ranking
-  pre_computation_required: false               # true if you pre-compute embeddings or train models offline
-  pre_computation_time_minutes: 0               # Approximate, if applicable
+  python_version: "3.10.1"                      # python --version
+  os: "Windows 11 Home (10.0.26200)"            # build 26200
+  uses_gpu_for_inference: false                 # CPU-only, no GPU
+  has_network_during_ranking: false             # No API/network calls during ranking
+  pre_computation_required: false               # Default lexical pipeline needs no pre-computation
+  pre_computation_time_minutes: 0               # N/A — ranking runs end-to-end in ~68s on 100K
 
 # ============================================================================
 # AI tools declaration
@@ -60,30 +57,35 @@ compute:
 # may verify these declarations against your code; declarations that contradict
 # your code or your interview are flagged.
 ai_tools_used:
-  - "Claude"        # e.g. for architecture discussion, code review
-  - "GitHub Copilot"  # e.g. for autocomplete
-  # Other options: "ChatGPT", "Cursor", "Gemini", "Codeium", "Other", "None"
+  - "Claude"        # Development assistant (code drafting, review, documentation)
+  # Other options: "ChatGPT", "GitHub Copilot", "Cursor", "Gemini", "Codeium", "Other", "None"
 
 ai_usage_summary: |
-  Briefly describe how AI tools were used. Examples:
-  - "Used Claude for code review and architectural discussion. Used Copilot for autocomplete.
-     No candidate data was fed to any LLM."
-  - "Used ChatGPT to debug Python issues and Cursor for refactoring."
-  - "No AI tools used."
+  Claude (Anthropic) was used as a development assistant for code drafting, code
+  review, and documentation. All architecture decisions, JD interpretation, trap
+  analysis, scoring design, and validation were human-reviewed. No candidate data
+  was fed to any LLM, and the ranking step itself contains zero LLM/API calls.
 
 # ============================================================================
 # Approach summary (optional but recommended)
 # ============================================================================
 methodology_summary: |
-  ≤200 word summary of your approach. Strongly recommended.
-
-  Example:
-  "Rule-based ranker with explicit reasoning capture. Five scoring components
-  (skills, title+career, experience years, location, education) combined with
-  a multiplicative behavioral-signal modifier. The title component is the
-  decisive signal against keyword-stuffer traps; an endorsement-and-duration
-  trust multiplier on skills catches lazy keyword stuffing. Runtime is ~10
-  seconds for 50K candidates on CPU."
+  Evidence-based two-stage ranker for the Senior AI Engineer JD, built on one
+  principle the JD itself demands: trust career-history evidence, not the skills
+  list (flagged as a planted trap). Stage 1 streams all 100K candidates and scores
+  JD fit from narrative text only (career descriptions, summary, titles) across the
+  four must-haves — embeddings/retrieval, vector/hybrid search, shipped ranking
+  systems, evaluation rigor — with diminishing-returns saturation so one buzzword is
+  not depth. Explicit disqualifiers are modeled: keyword stuffers (skills present but
+  never evidenced in career text), research-only and consulting-only careers,
+  job-hoppers, and an experience-band falloff around the ideal 6–8 yrs. A honeypot
+  plausibility filter forces internally-impossible profiles to score 0 (e.g. a skill
+  used longer than the whole career). A behavioral-availability multiplier (0.45–1.10)
+  folds in Redrob signals (activity recency, response rate, open-to-work, notice
+  period). Stage 2 re-ranks the top-1500 shortlist with a BM25 + TF-IDF lexical blend
+  (term saturation, length normalization, bigram phrase matching). Reasoning strings
+  use only extracted profile facts — no hallucination. CPU-only, no network, no LLM
+  calls at ranking time; ~68 s for 100K candidates, < 2 GB RAM.
 
 # ============================================================================
 # Declarations
@@ -92,5 +94,5 @@ declarations:
   read_submission_spec: true        # I have read submission_spec.md in full
   code_is_original_work: true       # My code is my team's original work (using AI as a tool is fine)
   no_collusion: true                # I have not coordinated my submission with other teams
-  honeypot_check_done: false        # OPTIONAL — set true if you explicitly checked for honeypots in your ranking
+  honeypot_check_done: true         # System filters internally-impossible profiles (features.honeypot_flags)
   reproduction_tested: true         # I have tested that my reproduce_command runs end-to-end
