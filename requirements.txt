@@ -5,7 +5,9 @@ plotly>=5.18
 rank-bm25>=0.2.2
 ijson>=3.2.3            # streaming JSON-array parser — no full-file load for large uploads
 psutil>=5.9            # optional RSS guard in the Streamlit upload path
-# Optional dense embedding layer (pulls torch ~700MB) lives in requirements-dense.txt.
-# The pipeline auto-falls back to the BM25 + TF-IDF blend when it is not installed,
-# which keeps free-tier cloud builds (e.g. Streamlit Community Cloud) fast and light.
-# For the full dense re-rank locally:  pip install -r requirements-dense.txt
+# Dense embedding layer for Stage-2 re-rank (pulls torch, CPU-only). Required to
+# reproduce the submission — the ranker runs the dense MiniLM blend and finishes
+# the 100K pool in ~180s (< 5-min budget). The all-MiniLM-L6-v2 model is committed
+# under ./models, so no download is needed at ranking time. If this package is ever
+# absent the pipeline auto-falls back to the BM25 + TF-IDF blend (different scores).
+sentence-transformers>=3.0

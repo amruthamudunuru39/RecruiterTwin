@@ -6,7 +6,7 @@
 
 <p align="center">
   Ranks 100,000 candidates against the <strong>Senior AI Engineer — Founding Team</strong> JD
-  in ~65 seconds on a laptop CPU. No GPU, no network, no LLM API calls during ranking.
+  in ~180 seconds on a laptop CPU. No GPU, no network, no LLM API calls during ranking.
 </p>
 
 ---
@@ -26,8 +26,9 @@ the top-100 CSV in `candidate_id,rank,score,reasoning` format. Accepts `.jsonl` 
 python validate_submission.py submission.csv   # validator from the hackathon bundle
 ```
 
-**Measured performance:** 100,000 candidates in ~65 s, < 2 GB RAM, single CPU —
-comfortably inside the 5-min / 16 GB budget.
+**Measured performance:** 100,000 candidates in ~180 s (dense re-rank enabled),
+< 2 GB RAM, single CPU — comfortably inside the 5-min / 16 GB budget. Lexical-only
+fallback (no `sentence-transformers`) runs in ~68 s.
 
 ## Why this architecture
 
@@ -97,29 +98,28 @@ profiles are compared fairly); TF-IDF bigrams add phrase-level matching like
 "hybrid search" and "learning to rank". The two are min-max normalized and
 blended 60/40 when running lexical-only.
 
-**Dense embedding layer (optional, experimental — NOT used for the submission).**
+**Dense embedding layer (enabled by default — used for the submission).**
 
-> ⚠️ The submitted `submission/team_recruitertwin.csv` is produced by the
-> **default lexical (BM25 + TF-IDF) pipeline** — the base `requirements.txt`
-> install, which reproduces it in **~68 s** on 100K candidates (well inside the
-> 5-minute budget). Do **not** install `requirements-dense.txt` to reproduce the
-> submission: enabling the dense re-rank pushes the 100K run to ~5 min+ on a
-> typical CPU (over the §3 budget) and produces a *different* ranking. The dense
-> layer is kept only as an experimental option for exploration on small samples.
+The submitted ranking is produced with the dense re-rank **on**. `sentence-transformers`
+is in `requirements.txt` and the `all-MiniLM-L6-v2` model (~80 MB) is committed under
+[`models/`](models/), so `pip install -r requirements.txt` + `python rank.py` reproduces
+the submission with **zero network calls** — the model loads from disk. Measured on the
+released 100K pool: **~180 s, < 2 GB RAM, CPU-only** — inside the 5-min / 16 GB budget.
 
-To try it on a small sample, run once with internet:
+The dense layer runs only on the 1,500-candidate Stage-1 shortlist (not all 100K), and
+the blend becomes **0.50·embedding + 0.30·BM25 + 0.20·TF-IDF**. It catches "plain-language"
+candidates who describe ranking/retrieval work without buzzwords — dense for meaning,
+sparse for exact terms, rules for constraints the text can't express. If
+`sentence-transformers` or the model folder is ever missing, the pipeline automatically
+falls back to the BM25 + TF-IDF blend (~68 s, slightly different ranking) with a logged
+warning — nothing breaks.
+
+The model is already committed, but to regenerate it from scratch (one-time, needs internet;
+pre-computation is allowed by spec §10.3):
 
 ```bash
-pip install -r requirements-dense.txt   # sentence-transformers + torch
-python scripts/download_model.py         # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
+python scripts/download_model.py   # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
 ```
-
-The model then loads from disk (zero network at ranking time, CPU-only) and is
-applied to the 1,500-candidate shortlist. Blend becomes 0.50·embedding +
-0.30·BM25 + 0.20·TF-IDF. It aims to catch "plain-language Tier 5" candidates who
-describe ranking/retrieval work without buzzwords. If the package or model
-folder is missing, the pipeline automatically falls back to BM25+TF-IDF — which
-is the intended, budget-compliant default.
 
 ## Reasoning generation
 

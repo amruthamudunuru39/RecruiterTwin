@@ -47,8 +47,8 @@ compute:
   os: "Windows 11 Home (10.0.26200)"            # build 26200
   uses_gpu_for_inference: false                 # CPU-only, no GPU
   has_network_during_ranking: false             # No API/network calls during ranking
-  pre_computation_required: false               # Default lexical pipeline needs no pre-computation
-  pre_computation_time_minutes: 0               # N/A — ranking runs end-to-end in ~68s on 100K
+  pre_computation_required: false               # MiniLM model committed under ./models; loaded from disk, no download at ranking time
+  pre_computation_time_minutes: 0               # N/A — ranking (dense re-rank on) runs end-to-end in ~180s on 100K
 
 # ============================================================================
 # AI tools declaration
