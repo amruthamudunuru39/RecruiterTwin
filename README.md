@@ -97,42 +97,29 @@ profiles are compared fairly); TF-IDF bigrams add phrase-level matching like
 "hybrid search" and "learning to rank". The two are min-max normalized and
 blended 60/40 when running lexical-only.
 
-**Dense embedding layer (optional, recommended).** Run once with internet:
+**Dense embedding layer (optional, experimental — NOT used for the submission).**
+
+> ⚠️ The submitted `submission/team_recruitertwin.csv` is produced by the
+> **default lexical (BM25 + TF-IDF) pipeline** — the base `requirements.txt`
+> install, which reproduces it in **~68 s** on 100K candidates (well inside the
+> 5-minute budget). Do **not** install `requirements-dense.txt` to reproduce the
+> submission: enabling the dense re-rank pushes the 100K run to ~5 min+ on a
+> typical CPU (over the §3 budget) and produces a *different* ranking. The dense
+> layer is kept only as an experimental option for exploration on small samples.
+
+To try it on a small sample, run once with internet:
 
 ```bash
 pip install -r requirements-dense.txt   # sentence-transformers + torch
 python scripts/download_model.py         # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
 ```
 
-Afterwards ranking loads the model from disk — zero network at ranking time,
-CPU-only, applied to the 1,500-candidate shortlist (not all 100K) to stay
-inside the 5-minute budget. Blend becomes 0.50·embedding + 0.30·BM25 +
-0.20·TF-IDF. This catches "plain-language Tier 5" candidates who describe
-ranking/retrieval work without buzzwords — dense for meaning, sparse for
-exact terms, rules for constraints the text can't express. If the model
-folder is missing, the pipeline automatically falls back to BM25+TF-IDF.
-
-#
-
-### Optional dense embedding layer (recommended)
-
-One-time setup with internet access (pre-computation is allowed by spec §10.3 —
-only the ranking step must be offline):
-
-```bash
-pip install -r requirements-dense.txt   # sentence-transformers + torch
-python scripts/download_model.py         # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
-```
-
-At ranking time the model loads from disk with zero network calls and runs on
-CPU over the 1,500-candidate shortlist only (~60–90 s extra). It catches
-plain-language strong candidates — engineers who built ranking/retrieval systems
-without using buzzwords — which lexical matching misses. Blend with the model
-present: 0.50·embedding + 0.30·BM25 + 0.20·TF-IDF. If the model folder is
-missing, the pipeline automatically falls back to the BM25+TF-IDF blend with a
-logged warning (nothing breaks). The interview-ready rationale: dense for
-meaning, sparse for exact technical terms, rules for constraints text can't
-express.
+The model then loads from disk (zero network at ranking time, CPU-only) and is
+applied to the 1,500-candidate shortlist. Blend becomes 0.50·embedding +
+0.30·BM25 + 0.20·TF-IDF. It aims to catch "plain-language Tier 5" candidates who
+describe ranking/retrieval work without buzzwords. If the package or model
+folder is missing, the pipeline automatically falls back to BM25+TF-IDF — which
+is the intended, budget-compliant default.
 
 ## Reasoning generation
 
