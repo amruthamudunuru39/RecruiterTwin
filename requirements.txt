@@ -5,5 +5,7 @@ plotly>=5.18
 rank-bm25>=0.2.2
 ijson>=3.2.3            # streaming JSON-array parser — no full-file load for large uploads
 psutil>=5.9            # optional RSS guard in the Streamlit upload path
-# Optional dense embedding layer (pulls torch ~700MB). Enable with scripts/download_model.py
-sentence-transformers>=3.0
+# Optional dense embedding layer (pulls torch ~700MB) lives in requirements-dense.txt.
+# The pipeline auto-falls back to the BM25 + TF-IDF blend when it is not installed,
+# which keeps free-tier cloud builds (e.g. Streamlit Community Cloud) fast and light.
+# For the full dense re-rank locally:  pip install -r requirements-dense.txt

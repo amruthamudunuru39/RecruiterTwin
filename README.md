@@ -100,7 +100,8 @@ blended 60/40 when running lexical-only.
 **Dense embedding layer (optional, recommended).** Run once with internet:
 
 ```bash
-python scripts/download_model.py   # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
+pip install -r requirements-dense.txt   # sentence-transformers + torch
+python scripts/download_model.py         # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
 ```
 
 Afterwards ranking loads the model from disk — zero network at ranking time,
@@ -119,8 +120,8 @@ One-time setup with internet access (pre-computation is allowed by spec §10.3 �
 only the ranking step must be offline):
 
 ```bash
-pip install sentence-transformers
-python scripts/download_model.py    # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
+pip install -r requirements-dense.txt   # sentence-transformers + torch
+python scripts/download_model.py         # saves all-MiniLM-L6-v2 (~80 MB) to ./models/
 ```
 
 At ranking time the model loads from disk with zero network calls and runs on
